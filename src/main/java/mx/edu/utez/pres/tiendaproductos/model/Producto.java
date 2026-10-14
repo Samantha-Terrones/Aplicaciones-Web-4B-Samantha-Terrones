@@ -1,18 +1,35 @@
 package mx.edu.utez.pres.tiendaproductos.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
-@Entity
+@Entity //especificamos que se trata de una identidad :3
 public class Producto {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)//hacemos que el id sea autoincrementable
     private long id;
+    @NotBlank(message = "Name is mandatory")
     private String name;
+    @PositiveOrZero
     private int stock;
+    @Positive
     private double price;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
 
     public Producto(long id, String name, int stock, double price) {
         this.id = id;
