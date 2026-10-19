@@ -42,7 +42,7 @@ public class ProductController {
     }
 
     @PostMapping()
-    public ResponseEntity<ProductResponse> sale(@Valid @RequestBody ProductRequest producto){
+    public ResponseEntity<ProductResponse> save(@Valid @RequestBody ProductRequest producto){
         Producto productSaved= service.save(toEntity(producto),producto.categoryId());
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse((productSaved)));
         /*if(producto.name().isEmpty()){
@@ -61,10 +61,18 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> update(@PathVariable Long id, @Valid @RequestBody ProductRequest producto){
-        Optional<Producto> optional= service.update(id,toEntity(producto));
-        if(optional.isPresent()){
-            return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(optional.get()));
+    public ResponseEntity<ProductResponse> update(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductRequest producto) {
+
+        Optional<Producto> productoUpdated = service.update(
+                id,
+                toEntity(producto),
+                producto.categoryId()
+        );
+
+        if (productoUpdated.isPresent()) {
+            return ResponseEntity.ok(toResponse(productoUpdated.get()));
         }
         return ResponseEntity.notFound().build();
     }

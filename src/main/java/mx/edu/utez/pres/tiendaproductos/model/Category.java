@@ -3,14 +3,22 @@ package mx.edu.utez.pres.tiendaproductos.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "category")
 public class Category {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
+
+    public Category() {
+    }
+
+    public Category(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     public Long getId() {
         return id;
@@ -26,13 +34,5 @@ public class Category {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
     }
 }
