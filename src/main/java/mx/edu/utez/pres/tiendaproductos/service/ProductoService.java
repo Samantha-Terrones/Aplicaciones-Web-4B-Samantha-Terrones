@@ -1,6 +1,7 @@
 package mx.edu.utez.pres.tiendaproductos.service;
 
 
+import mx.edu.utez.pres.tiendaproductos.exception.InsufficientStockException;
 import mx.edu.utez.pres.tiendaproductos.exception.ResourceNotFoundException;
 import mx.edu.utez.pres.tiendaproductos.model.Category;
 import mx.edu.utez.pres.tiendaproductos.model.Producto;
@@ -31,11 +32,10 @@ public class ProductoService {
         return repo.findById(id);
     }
 
-    public Producto save(Producto producto,Long categoryId){
-        Category category= repoCategory.findById(categoryId).orElseThrow(
-                ()->
-                    new ResourceNotFoundException("Category not found with id"+categoryId)
-        );//Arrojar un error cuando no encuentre un Optional para category, arroja un error evitando que el producte se cree
+    public Producto save(Producto producto, Long categoryId) {
+        Category category = repoCategory.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
+
         producto.setCategory(category);
         return repo.save(producto);
     }
@@ -68,5 +68,25 @@ public class ProductoService {
         }
         repo.deleteById(id);
         return true;
+    }
+
+    public Producto updateStock(Long productId, Integer cantidad, String action) {
+        Producto producto = repo.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con el id: " + productId));
+
+        if ("add".equalsIgnoreCase(action)) {
+            producto.setStock(producto.getStock() + cantidad);
+        } else if ("remove".equalsIgnoreCase(action)) {
+            if (producto.getStock() < cantidad) {
+                throw new InsufficientStockException(
+                        "Stock insuficiente. Stock actual: " + producto.getStock() + ", solicitado: " + cantidad
+                );
+            }
+            producto.setStock(producto.getStock() - cantidad);
+        } else {
+            throw new IllegalArgumentException("Acción inválida. Usa 'add' o 'remove'.");
+        }
+
+        return repo.save(producto);
     }
 }

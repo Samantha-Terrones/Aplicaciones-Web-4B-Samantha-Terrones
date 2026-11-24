@@ -3,6 +3,7 @@ package mx.edu.utez.pres.tiendaproductos.controller;
 import jakarta.validation.Valid;
 import mx.edu.utez.pres.tiendaproductos.dto.ProductRequest;
 import mx.edu.utez.pres.tiendaproductos.dto.ProductResponse;
+import mx.edu.utez.pres.tiendaproductos.dto.StockRequest;
 import mx.edu.utez.pres.tiendaproductos.model.Producto;
 import mx.edu.utez.pres.tiendaproductos.service.ProductoService;
 import org.springframework.http.HttpStatus;
@@ -77,8 +78,18 @@ public class ProductController {
         return ResponseEntity.notFound().build();
     }
 
-    private ProductResponse toResponse(Producto product){
-        return new ProductResponse(product.getName(), product.getId(), product.getPrice(), product.getStock(),  0L,"");
+    private ProductResponse toResponse(Producto producto) {
+        Long categoryId = (producto.getCategory() != null) ? producto.getCategory().getId() : 0L;
+        String categoryName = (producto.getCategory() != null) ? producto.getCategory().getName() : "";
+
+        return new ProductResponse(
+                producto.getName(),
+                producto.getId(),
+                producto.getPrice(),
+                producto.getStock(),
+                categoryId,
+                categoryName
+        );
     }
 
     private Producto toEntity(ProductRequest request){
@@ -87,6 +98,15 @@ public class ProductController {
         producto.setPrice(request.price());
         producto.setStock(request.stock());
         return producto;
+    }
+
+    @PatchMapping("/{id}/stock")
+    public ResponseEntity<ProductResponse> updateStock(
+            @PathVariable Long id,
+            @Valid @RequestBody StockRequest request) {
+
+        Producto productoActualizado = service.updateStock(id, request.cantidad(), request.action());
+        return ResponseEntity.ok(toResponse(productoActualizado));
     }
 
 }
